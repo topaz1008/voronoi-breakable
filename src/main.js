@@ -43,7 +43,7 @@ const render = Render.create({
         wireframes: WIREFRAME,
         showAngleIndicator: false,
         showDebug: false,
-        showBounds: true,
+        showBounds: false,
         showVelocity: false,
         showCollisions: false,
         showSeparations: false,
@@ -53,16 +53,18 @@ const render = Render.create({
 });
 
 const ground = Bodies.rectangle(VIEW_WIDTH / 2, VIEW_HEIGHT + 10, VIEW_WIDTH + 10, 60, { isStatic: true });
+const leftWall = Bodies.rectangle(-10, VIEW_HEIGHT, 60, 400, { isStatic: true });
+const rightWall = Bodies.rectangle(VIEW_WIDTH + 10, VIEW_HEIGHT, 60, 400, { isStatic: true });
 
 // Add bodies to the world
-Composite.add(engine.world, [ground]);
+Composite.add(engine.world, [ground, leftWall, rightWall]);
 
 document.addEventListener('click', () => {
     if (!isPaused) {
         // Reset timescale, clear the world and re-add bodies.
         engine.timing.timeScale = 1;
         Composite.clear(engine.world, true, true);
-        addBodies();
+        shootBoxes();
 
     } else {
         unpause();
@@ -164,8 +166,8 @@ function voronoiBreakBody(body) {
 function voronoiBreakPoly(body) {
     // A random point spray
     const sites = [];
-    // const sitesCount = Math.round(Common.random(50, 100));
-    const sitesCount = 125;
+    const sitesCount = Math.round(Common.random(100, 200));
+    // const sitesCount = 125;
     for (let i = 0; i < sitesCount; ++i) {
         // const p = Vector.create(Common.random(0, BOX_SIZE), Common.random(0, BOX_SIZE));
         const p = Vector.create(Common.random(-BOX_SIZE * 0.5, BOX_SIZE * 0.5), Common.random(-BOX_SIZE * 0.5, BOX_SIZE * 0.5));
@@ -214,6 +216,7 @@ function voronoiBreakPoly(body) {
             // position: Vector.add(cellSite, Vector.sub(body.position, cellSite)),
             position: Vector.add(cellSite, body.position),
             vertices: vertices,
+            restitution: .75,
             render: {
                 fillStyle: '#ffffff'
             }
@@ -235,6 +238,7 @@ function slowmo(scale, time) {
     engine.timing.timeScale = scale;
     setTimeout(() => {
         engine.timing.timeScale = 1;
+
     }, time || 2500);
 }
 
@@ -256,13 +260,13 @@ function getBodyOptions(texture) {
     };
 }
 
-function addBodies() {
+function shootBoxes() {
     const leftBoxOptions = getBodyOptions('./sprites/checkers.png');
     const rightBoxOptions = getBodyOptions('./sprites/checkers.png');
 
     // Left and right boxes
-    const leftBox = Bodies.rectangle(-50, 100, BOX_SIZE, BOX_SIZE, leftBoxOptions);
-    const rightBox = Bodies.rectangle(VIEW_WIDTH + 50, 100, BOX_SIZE, BOX_SIZE, rightBoxOptions);
+    const leftBox = Bodies.rectangle(-50, Common.random(50, 200), BOX_SIZE, BOX_SIZE, leftBoxOptions);
+    const rightBox = Bodies.rectangle(VIEW_WIDTH + 50, Common.random(50, 200), BOX_SIZE, BOX_SIZE, rightBoxOptions);
 
     leftBox.isBreakable = true;
     rightBox.isBreakable = true;
@@ -286,8 +290,8 @@ function addBodies() {
     const position2 = Vector.create(0, 0);
     const force2 = Vector.mult(Vector.normalise(Vector.create(Common.random(0, -1), 0)), Common.random(6, 9));
 
-    Body.applyForce(leftBox, leftBox.position, force1);
-    Body.applyForce(rightBox, rightBox.position, force2);
+    Body.applyForce(leftBox, position1, force1);
+    Body.applyForce(rightBox, position2, force2);
 
     // Add to composite
     Composite.add(engine.world, [leftBox, rightBox]);
@@ -309,7 +313,7 @@ Render.lookAt(render, {
     max: { x: VIEW_WIDTH, y: VIEW_HEIGHT }
 });
 
-addBodies();
+shootBoxes();
 
 // Run the renderer
 Render.run(render);
