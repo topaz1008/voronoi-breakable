@@ -24,7 +24,7 @@ const engineOptions = {
     enableSleeping: true,
     gravity: {
         x: 0,
-        y: 1,
+        y: 1.2,
         scale: 0.001
     }
 };
@@ -37,7 +37,7 @@ const render = Render.create({
     element: document.body,
     engine: engine,
     options: {
-        background: '#565656',
+        background: '#3d3d3d',
         width: VIEW_WIDTH,
         height: VIEW_HEIGHT,
         wireframes: WIREFRAME,
@@ -108,7 +108,7 @@ Events.on(engine, 'collisionStart', (e) => {
         // pause();
         if (a && a.isBreakable) {
             voronoiBreakBody(a);
-            // slowmo(0.1);
+            // slowmo(0.25, 2500);
             broken = true;
         }
         if (b && b.isBreakable) {
@@ -145,7 +145,7 @@ function voronoiBreakBody(body) {
         const p = broken[i];
 
         let n = Vector.sub(body.position, p.position);
-        n = Vector.mult(n, -body.angularVelocity * Vector.magnitude(n) * Common.random(1, 2));
+        n = Vector.mult(n, -body.angularVelocity * Vector.magnitude(n) * Common.random(1, 4));
 
         Body.setMass(p, body.mass / broken.length);
         Body.setVelocity(p, body.velocity);
@@ -212,13 +212,16 @@ function voronoiBreakPoly(body) {
 
         // Create bodies from all the pieces
         const cellSite = cell.site;
+        const render = body.render;
         const b = Body.create({
             // position: Vector.add(cellSite, Vector.sub(body.position, cellSite)),
             position: Vector.add(cellSite, body.position),
             vertices: vertices,
-            restitution: .75,
+            restitution: 0.75,
             render: {
-                fillStyle: '#ffffff'
+                fillStyle: render.fillStyle,
+                strokeStyle: render.strokeStyle,
+                lineWidth: render.lineWidth
             }
         });
 
@@ -242,15 +245,17 @@ function slowmo(scale, time) {
     }, time || 2500);
 }
 
-function getBodyOptions(texture) {
+function getBodyOptions(texture, fillStyle) {
     return {
         friction: 0.1,
-        frictionAir: 0.01,
+        frictionAir: 0.001,
         frictionStatic: 1,
         restitution: 0,
         angularVelocity: 0,
         render: {
-            fillStyle: '#ffffff',
+            fillStyle: fillStyle || '#ffffff',
+            strokeStyle: '#000',
+            lineWidth: 2,
             sprite: {
                 // texture: texture,
                 // xScale: BOX_SCALE,
@@ -261,8 +266,8 @@ function getBodyOptions(texture) {
 }
 
 function shootBoxes() {
-    const leftBoxOptions = getBodyOptions('./sprites/checkers.png');
-    const rightBoxOptions = getBodyOptions('./sprites/checkers.png');
+    const leftBoxOptions = getBodyOptions('./sprites/checkers.png', '#b91717');
+    const rightBoxOptions = getBodyOptions('./sprites/checkers.png', '#2432c0');
 
     // Left and right boxes
     const leftBox = Bodies.rectangle(-50, Common.random(50, 200), BOX_SIZE, BOX_SIZE, leftBoxOptions);
