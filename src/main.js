@@ -12,13 +12,17 @@ const Engine = Matter.Engine,
 const WIREFRAME = false,
     PAUSE_ON_IMPACT = false;
 
+// Add a debug canvas? (separate canvas added to the DOM)
+// It will draw vertices and shapes for all bodies that are currently in the world.
+const DEBUG_CANVAS = false;
+
 const VIEW_WIDTH = 1280,
     VIEW_HEIGHT = 720,
     BOX_SIZE = 100, // Box size (in pixels)
-    BOX_MASS = 100, // Box size (in pixels)
-    BOX_SCALE = 1; // Uniform scaling
+    BOX_MASS = 100; // Box size (in pixels)
 
 let isPaused = false;
+let animationFrameHandle = null;
 
 const engineOptions = {
     enableSleeping: true,
@@ -31,6 +35,9 @@ const engineOptions = {
 
 // Create the engine
 const engine = Engine.create(engineOptions);
+
+// Voronoi object
+const voronoi = new Voronoi();
 
 // Create the renderer
 const render = Render.create({
@@ -83,7 +90,7 @@ function update() {
 
     Engine.update(engine);
 
-    requestAnimationFrame(update);
+    animationFrameHandle = requestAnimationFrame(update);
 }
 
 Events.on(engine.world, 'afterAdd', (e) => {
@@ -134,26 +141,23 @@ Events.on(engine, 'collisionEnd', (e) => {
 function voronoiBreakBody(body) {
     const broken = voronoiBreakPoly(body);
 
-    const newBody = Body.create({
-        position: body.position,
-        // position: Vector.add(body.position, Vector.create(150, 150)),
-        render: {
-            fillStyle: '#ffffff'
-        }
-    });
+    // const newBody = Body.create({
+    //     position: body.position,
+    //     // position: Vector.add(body.position, Vector.create(150, 150)),
+    //     render: {
+    //         fillStyle: '#ffffff'
+    //     }
+    // });
     for (let i = 0; i < broken.length; i++) {
         const p = broken[i];
 
         let n = Vector.sub(body.position, p.position);
         n = Vector.mult(n, -body.angularVelocity * Vector.magnitude(n) * Common.random(1, 4));
 
-        Body.setMass(p, body.mass / broken.length);
-        Body.setVelocity(p, body.velocity);
-        Body.setAngle(p, body.angle);
-        Body.setAngularVelocity(p, body.angularVelocity);
-
         p.velocity.x += n.x;
         p.velocity.y += n.y;
+
+        Body.setMass(p, body.mass / broken.length);
         Composite.add(engine.world, p);
     }
 
@@ -170,11 +174,12 @@ function voronoiBreakPoly(body) {
     // const sitesCount = 125;
     for (let i = 0; i < sitesCount; ++i) {
         // const p = Vector.create(Common.random(0, BOX_SIZE), Common.random(0, BOX_SIZE));
-        const p = Vector.create(Common.random(-BOX_SIZE * 0.5, BOX_SIZE * 0.5), Common.random(-BOX_SIZE * 0.5, BOX_SIZE * 0.5));
+        const p = Vector.create(
+            Common.random(-BOX_SIZE * 0.5, BOX_SIZE * 0.5),
+            Common.random(-BOX_SIZE * 0.5, BOX_SIZE * 0.5)
+        );
         sites.push(p);
     }
-
-    const voronoi = new Voronoi();
     const bbox = {
         xl: -BOX_SIZE * 0.5,
         xr: BOX_SIZE * 0.5,
@@ -224,6 +229,11 @@ function voronoiBreakPoly(body) {
                 lineWidth: render.lineWidth
             }
         });
+        Body.setVelocity(b, body.velocity);
+        Body.setAngle(b, body.angle);
+        Body.setAngularVelocity(b, body.angularVelocity);
+        // const pos = Vector.add(cellSite, body.position);
+        // const b = Bodies.fromVertices(pos.x, pos.y, vertices);
 
         Body.setCentre(b, Vector.create(0, 0), true);
         // Body.rotate(b, body.angle);
@@ -304,11 +314,15 @@ function shootBoxes() {
 
 function pause() {
     isPaused = true;
+    cancelAnimationFrame(animationFrameHandle);
+    animationFrameHandle = null;
 }
 
 function unpause() {
     isPaused = false;
-    requestAnimationFrame(update);
+    if (animationFrameHandle === null) {
+        animationFrameHandle = requestAnimationFrame(update);
+    }
 }
 
 // Look at viewport
@@ -323,7 +337,7 @@ shootBoxes();
 // Run the renderer
 Render.run(render);
 
-requestAnimationFrame(update);
+animationFrameHandle = requestAnimationFrame(update);
 
 function randomVec2(min, max) {
     const x = Common.random(min, max);
@@ -333,65 +347,67 @@ function randomVec2(min, max) {
 }
 
 // A debug canvas
-// const canvas = document.createElement('canvas'),
-//     context = canvas.getContext('2d');
-//
-// canvas.width = VIEW_WIDTH;
-// canvas.height = VIEW_HEIGHT;
-//
-// document.body.appendChild(canvas);
-//
-// (function renderDebugCanvas() {
-//     const bodies = Composite.allBodies(engine.world);
-//
-//     requestAnimationFrame(renderDebugCanvas);
-//
-//     context.fillStyle = '#505050';
-//     context.fillRect(0, 0, canvas.width, canvas.height);
-//
-//     context.lineWidth = 2;
-//     context.strokeStyle = '#000000';
-//     context.beginPath();
-//
-//     for (let i = 0; i < bodies.length; i++) {
-//         const vertices = bodies[i].vertices;
-//
-//         drawBody(vertices);
-//         const parts = bodies[i].parts;
-//         for (let j = 0; j < parts.length; j++) {
-//             drawBody(parts[j].vertices);
-//         }
-//     }
-//     context.stroke();
-//
-//     context.lineWidth = 2;
-//     context.fillStyle = '#ff0000';
-//     for (let i = 0; i < bodies.length; i++) {
-//         const vertices = bodies[i].vertices;
-//
-//         drawBodyVertices(vertices);
-//         const parts = bodies[i].parts;
-//         for (let j = 0; j < parts.length; j++) {
-//             drawBodyVertices(parts[j].vertices);
-//         }
-//     }
-//
-//     function drawBody(vertices) {
-//         context.moveTo(vertices[0].x, vertices[0].y);
-//         for (let i = 1; i < vertices.length; i++) {
-//             context.lineTo(vertices[i].x, vertices[i].y);
-//         }
-//
-//         context.lineTo(vertices[0].x, vertices[0].y);
-//         context.closePath();
-//     }
-//
-//     function drawBodyVertices(vertices) {
-//         for (let i = 0; i < vertices.length; i++) {
-//             context.beginPath();
-//             context.arc(vertices[i].x, vertices[i].y, 3, 0, 2 * Math.PI);
-//             context.fill();
-//         }
-//     }
-//
-// })();
+if (DEBUG_CANVAS) {
+    const canvas = document.createElement('canvas'),
+        context = canvas.getContext('2d');
+
+    canvas.width = VIEW_WIDTH;
+    canvas.height = VIEW_HEIGHT;
+
+    document.body.appendChild(canvas);
+
+    (function renderDebugCanvas() {
+        const bodies = Composite.allBodies(engine.world);
+
+        requestAnimationFrame(renderDebugCanvas);
+
+        context.fillStyle = '#505050';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        context.lineWidth = 2;
+        context.strokeStyle = '#000000';
+        context.beginPath();
+
+        for (let i = 0; i < bodies.length; i++) {
+            const vertices = bodies[i].vertices;
+
+            drawBody(vertices);
+            const parts = bodies[i].parts;
+            for (let j = 0; j < parts.length; j++) {
+                drawBody(parts[j].vertices);
+            }
+        }
+        context.stroke();
+
+        context.lineWidth = 1;
+        context.fillStyle = '#ff0000';
+        for (let i = 0; i < bodies.length; i++) {
+            const vertices = bodies[i].vertices;
+
+            drawBodyVertices(vertices);
+            const parts = bodies[i].parts;
+            for (let j = 0; j < parts.length; j++) {
+                drawBodyVertices(parts[j].vertices);
+            }
+        }
+
+        function drawBody(vertices) {
+            context.moveTo(vertices[0].x, vertices[0].y);
+            for (let i = 1; i < vertices.length; i++) {
+                context.lineTo(vertices[i].x, vertices[i].y);
+            }
+
+            context.lineTo(vertices[0].x, vertices[0].y);
+            context.closePath();
+        }
+
+        function drawBodyVertices(vertices) {
+            for (let i = 0; i < vertices.length; i++) {
+                context.beginPath();
+                context.arc(vertices[i].x, vertices[i].y, 1, 0, 2 * Math.PI);
+                context.fill();
+            }
+        }
+
+    })();
+}
