@@ -1,7 +1,9 @@
 voronoi-breakable WIP
 ========================
-A demo utilizing [matter.js](https://github.com/liabru/matter-js) and voronoi diagrams to create a breakable rigid bodies simulation.
-Using Voronoi library by gorhill https://github.com/gorhill/Javascript-Voronoi
+
+Breakable rigid bodies simulation using Voronoi diagrams.
+
+Using [matter.js](https://github.com/liabru/matter-js) physics engine and [Javascript-Voronoi](https://github.com/gorhill/Javascript-Voronoi) library by gorhill for calculating the voronoi diagram. 
 
 The voronoi diagram is calculated on-the-fly in real-time, and the number of sites is randomized using a random point spray.
 
