@@ -42,7 +42,7 @@ const voronoi = new Voronoi();
 
 // Create the renderer
 const render = Render.create({
-    element: document.body,
+    element: document.querySelector('#canvas-container'),
     engine: engine,
     options: {
         background: '#3d3d3d',
@@ -67,7 +67,10 @@ const rightWall = Bodies.rectangle(VIEW_WIDTH + 10, VIEW_HEIGHT, 60, 400, { isSt
 // Add bodies to the world
 Composite.add(engine.world, [ground, leftWall, rightWall]);
 
-document.addEventListener('click', () => {
+document.addEventListener('click', (e) => {
+    const canvas = document.querySelector('canvas');
+    if (e.target !== canvas) return;
+
     if (!isPaused) {
         // Reset timescale, clear the world and re-add bodies.
         engine.timing.timeScale = 1;
@@ -233,6 +236,7 @@ function voronoiBreakPoly(body) {
                 lineWidth: render.lineWidth
             }
         });
+        b.sleepThreshold = 6;
         Body.setVelocity(b, body.velocity);
         Body.setAngle(b, body.angle);
         Body.setAngularVelocity(b, body.angularVelocity);

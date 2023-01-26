@@ -1,18 +1,97 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>voronoi-breakable</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
     <style>
-        body { margin: 0; background: #787878; color: #fff; }
-        a, a:active, a:visited { color: #666 ; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        body canvas { cursor: default; margin: 50px auto auto auto; display: block; }
+        :root {
+            --max-width: 1280px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        header {
+            max-width: var(--max-width);
+            margin: 50px auto auto auto;
+        }
+
+        header, main {
+            padding: 0 !important;
+        }
+
+        canvas {
+            margin: 0 0 0 15%;
+            padding: 0;
+            cursor: default;
+            display: block;
+        }
+
+        canvas {
+            cursor: default;
+            margin: 0 0 auto auto;
+            display: block;
+        }
+
+        #canvas-container {
+            text-align: center;
+            max-width: var(--max-width);
+
+            /* This will make the canvas responsive without the need to resize */
+            width: 100%;
+            object-fit: contain;
+        }
+
+        details p {
+            margin-bottom: 10px;
+        }
+
+        .t1008-grid {
+            max-width: var(--max-width);
+            display: grid;
+            grid-template-columns: 2fr 0.5fr;
+            /*grid-template-rows: 1.6fr 0.4fr;*/
+            gap: 0 0;
+            grid-auto-flow: row;
+            grid-template-areas: '. .' '. .';
+        }
     </style>
 </head>
 <body>
+<header>
+    <h2>Breakable rigid bodies Voronoi diagrams</h2>
+    <details open>
+        <summary>About</summary>
+        <p>You can click anywhere on the canvas to shoot more boxes.</p>
+        <p>The voronoi diagram is calculated on-the-fly in real-time, and the number of sites is randomized using a random point spray.</p>
+        <p>Obviously it's not the most efficient way to do that but for this purpose of this demo it is fast enough.</p>
+        <p>NOTE: This demo is just a simple poc tech demo, might invest more in the future to make this code better written.
+            but for the time being this is just a research/poc/educational project.</p>
+    </details>
+    <details>
+        <summary>Source Code</summary>
+        <p>Can be found on my <a href="https://github.com/topaz1008/voronoi-breakable/" target="_blank">Github</a>.
+        </p>
+    </details>
+    <details>
+        <summary>Credits</summary>
+        <p>This demo uses <a href="https://github.com/liabru/matter-js" target="_blank">matter.js</a> 2D physics engine
+            and <a href="https://github.com/gorhill/Javascript-Voronoi" target="_blank">Javascript-Voronoi</a> library
+            by gorhill for calculating the voronoi diagram..</p>
+    </details>
+</header>
+
+<main id="main-grid" class="t1008-grid">
+
+    <div id="canvas-container">
+        <!-- canvas goes here -->
+    </div>
+
+</main>
 
 <script src="node_modules/voronoi/rhill-voronoi-core.js"></script>
 <script src="node_modules/matter-js/build/matter.dev.js"></script>
