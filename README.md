@@ -7,7 +7,7 @@ Using [matter.js](https://github.com/liabru/matter-js) physics engine and [Javas
 
 The voronoi diagram is calculated on-the-fly in real-time, and the number of sites is randomized using a random point spray.
 
-Obviously it's not the most efficient way to do that but for this purpose of this demo it is fast enough.
+Obviously it's not the most efficient way to do that but for the purpose of this demo it is fast enough.
 
 NOTE: This demo is just a simple poc tech demo, might invest more in the future to make this code better written.
 but for the time being this is just a research/poc/educational project.
