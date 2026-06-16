@@ -1,0 +1,84 @@
+:root {
+  --bg: #131318;
+  --surface: #1c1c23;
+  --text: #e7e4dc;
+  --text-dim: #8d8a93;
+  --max-width: 1280px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  margin: 0 0 20px;
+}
+
+#canvas-container {
+  background: var(--surface);
+  border-radius: 6px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+#canvas-container canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-top: 14px;
+  margin-bottom: 16px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
+
+.hints kbd {
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid #2e2e38;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-family: inherit;
+}
+
+footer {
+  margin-top: 28px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+footer a {
+  color: var(--text);
+}

@@ -1,18 +1,27 @@
-voronoi-breakable WIP
+voronoi-breakable
 ========================
 
 Breakable rigid bodies simulation using Voronoi diagrams.
 
-Using [matter.js](https://github.com/liabru/matter-js) physics engine and [Javascript-Voronoi](https://github.com/gorhill/Javascript-Voronoi) library by gorhill for calculating the voronoi diagram. 
+Built with the [matter.js](https://github.com/liabru/matter-js) physics engine and [d3-delaunay](https://github.com/d3/d3-delaunay)
+for computing Voronoi diagrams on the fly.
 
-The voronoi diagram is calculated on-the-fly in real-time, and the number of sites is randomized using a random point spray.
-
-Obviously it's not the most efficient way to do that but for the purpose of this demo it is fast enough.
-
-NOTE: This demo is just a simple poc tech demo, might invest more in the future to make this code better written.
-but for the time being this is just a research/poc/educational project.
+On every qualifying impact the body is fractured in real time: Voronoi sites are
+sprayed across the body in its local frame, clustered around the contact point for a
+radial shatter pattern, and each cell becomes a new rigid body that inherits the
+velocity of its material point (`v + ω × r`). Fragments are
+texture-mapped so the shards visually reassemble the original body, and large
+fragments can break again recursively.
 
 ## Demo
-[Live demo](https://topaz1008.github.io/voronoi-breakable/); it will shoot 2 boxes towards each other on load, but you can click the mouse anywhere to shoot more.
 
-You can also pause/unpause using the `P` key.
+[Live demo](https://topaz1008.github.io/voronoi-breakable/) — two boxes are shot at each other on load.
+
+Controls:
+
+* **Click** the canvas to drop a box.
+* **drag** to aim and launch one.
+* `B` shoot boxes, `R` reset, `P` pause.
+* The panel (top right) controls material (checkers / stone / wood / glass),
+  shard count, impact focus, break threshold, recursion, slow motion, screen
+  shake, particles and gravity.
